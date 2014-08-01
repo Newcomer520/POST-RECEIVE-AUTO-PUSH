@@ -1,0 +1,61 @@
+#!/bin/sh
+#
+# An example hook script for the "post-receive" event.
+#
+# The "post-receive" script is run after receive-pack has accepted a pack
+# and the repository has been updated.  It is passed arguments in through
+# stdin in the form
+#  <oldrev> <newrev> <refname>
+# For example:
+#  aa453216d1b3e49e7f6f98441fa56946ddcd6a20 68f7abf4e6f922807889f52bc043ecd31b79f814 refs/heads/master
+#
+# see contrib/hooks/ for a sample, or uncomment the next line and
+# rename the file to "post-receive".
+
+#. /usr/share/doc/git-core/contrib/hooks/post-receive-email
+
+MINE='//c4c008963/share/inip'
+GITDIR='./'
+deploy_to_dir=(\
+	'//10.56.198.55/inipportal$/'\
+	'//10.55.3.223/inipportal$/' \
+	'//10.55.201.223/inipportal$/'\
+	'//ngbinip01/wwwroot/'\
+	'//shainip01/wwwroot/'\
+	'//nkginip01/wwwroot/'\
+	'//nahinip01/wwwroot/')
+read oldrev newrev refname
+
+{
+	echo "PUSH to mine...." &&
+	#cd $MINE &&
+	unset GIT_DIR &&
+	for dep in "${deploy_to_dir[@]}"
+	do
+		cd $dep &&
+		echo "deploy to the directory: $dep" &&
+		git fetch --all &&
+		git reset --hard origin/master
+	done
+
+
+	#for dep in "${deploy_to_dir[@]}"
+	#do
+	#	echo "deploy to the directory: $dep" &&
+	#	`GIT_WORK_TREE=$dep git checkout -f master`
+	#done
+	#echo "current directory: $(pwd)" &&
+	#`GIT_WORK_TREE=$deploy_to_dir git checkout -f master`
+	#git fetch --all &&
+	#git reset --hard origin/master
+	#`GIT_WORK_TREE="#{MINE}" git checkout -f master`
+	#git checkout master -f 
+	#git pull origin master -u
+	#git --work-tree=./ --git-dir=$GITDIR checkout -f &&
+	#git --work-tree=./ --git-dir=$GITDIR clean -fd
+} ||
+{
+	echo "something wrong"
+}
+
+
